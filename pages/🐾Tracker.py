@@ -4,6 +4,11 @@ st.set_page_config(page_title="Tracker", page_icon=":paw_prints:", layout="wide"
 
 st.sidebar.header(":mag: View")
 
+# get options from fb
+
+# add options to fb
+
+
 # Create a multiselect widget for the user to choose options
 selected_options = st.sidebar.multiselect(
     'Select options:',
