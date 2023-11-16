@@ -1,7 +1,11 @@
 import streamlit as st
 
+st.set_page_config(page_title="Tracker", page_icon=":paw_prints:", layout="wide")
+
+st.sidebar.header(":mag: View")
+
 # Create a multiselect widget for the user to choose options
-selected_options = st.multiselect(
+selected_options = st.sidebar.multiselect(
     'Select options:',
     ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Add New Option']
 )

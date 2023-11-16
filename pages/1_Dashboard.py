@@ -12,10 +12,10 @@ import json
 
 import utils
 
-credentials_path = "./adminsdk.json"
-db = firestore.Client.from_service_account_json(credentials_path)
+# credentials_path = "./adminsdk.json"
+# db = firestore.Client.from_service_account_json(credentials_path)
 
-utils.upload_csv_to_db(db, "./daily.csv")
+# utils.upload_csv_to_db(db, "./daily.csv")
 
 # doc_ref = db.collection("User").document("eagle")
 # print(doc_ref)
@@ -45,25 +45,27 @@ utils.upload_csv_to_db(db, "./daily.csv")
 # training seq data (can turn them into figures)
 # seaborn
 
-st.set_page_config(page_title="My Life", page_icon=":eagle:", layout="wide")
+# fl = st.file_uploader(":file_folder: Upload a file", type=(["csv", "txt", "xlsx", "xls", "ods"]))
+# if fl is not None:
+#     filename = fl.name
+#     st.write(filename)
+#     if filename.endswith(".ods"):
+#         pyexcel_ods.save_data(filename, "output.csv")
+#     df = pd.read_csv("output.csv", encoding="ISO-8859-1")
+# else:
+#     current_dir = os.getcwd()
+#     os.chdir(current_dir)
+#     # pyexcel_ods.save_data("data.ods", "output.csv")
+#     df = pd.read_csv("daily.csv", encoding="ISO-8859-1")
+#     # print(df.head())
 
-st.title(" :eagle: My Life")
+st.set_page_config(page_title="Dashboard", page_icon=":mountain:", layout="wide")
 
-st.markdown("<style>div.block-container{padding-top:1rem;}</style>", unsafe_allow_html=True)
-
-fl = st.file_uploader(":file_folder: Upload a file", type=(["csv", "txt", "xlsx", "xls", "ods"]))
-if fl is not None:
-    filename = fl.name
-    st.write(filename)
-    if filename.endswith(".ods"):
-        pyexcel_ods.save_data(filename, "output.csv")
-    df = pd.read_csv("output.csv", encoding="ISO-8859-1")
-else:
-    current_dir = os.getcwd()
-    os.chdir(current_dir)
-    # pyexcel_ods.save_data("data.ods", "output.csv")
-    df = pd.read_csv("daily.csv", encoding="ISO-8859-1")
-    # print(df.head())
+current_dir = os.getcwd()
+os.chdir(current_dir)
+# pyexcel_ods.save_data("data.ods", "output.csv")
+df = pd.read_csv("daily.csv", encoding="ISO-8859-1")
+# print(df.head())
 
 col1, col2 = st.columns((2))
 
@@ -116,28 +118,9 @@ elif subcategory and task:
     filtered_df = df3[df["Subcategory"].isin(subcategory) & df["Task"].isin(task)]
 elif category and task:
     filtered_df = df3[df["Category"].isin(category) & df3["Task"].isin(task)]
-elif region and state:
-    filtered_df = df3[df["Region"].isin(region) & df3["State"].isin(state)]
-elif city:
-    filtered_df = df3[df3["City"].isin(city)]
+elif category and subcategory:
+    filtered_df = df3[df["Category"].isin(category) & df3["Subcategory"].isin(subcategory)]
+elif task:
+    filtered_df = df3[df3["Task"].isin(task)]
 else:
-    filtered_df = df3[df3["Region"].isin(region) & df3["State"].isin(state) & df3["City"].isin(city)]
-
-    if not region and not state and not city:
-    filtered_df = df
-elif not state and not city:
-    filtered_df = df[df["Region"].isin(region)]
-elif not region and not city:
-    filtered_df = df[df["State"].isin(state)]
-elif state and city:
-    filtered_df = df3[df["State"].isin(state) & df3["City"].isin(city)]
-elif region and city:
-    filtered_df = df3[df["Region"].isin(region) & df3["City"].isin(city)]
-elif region and state:
-    filtered_df = df3[df["Region"].isin(region) & df3["State"].isin(state)]
-elif city:
-    filtered_df = df3[df3["City"].isin(city)]
-else:
-    filtered_df = df3[df3["Region"].isin(region) & df3["State"].isin(state) & df3["City"].isin(city)]
-
-category_df = filtered_df.groupby(by = ["Category"], as_index = False)["Sales"].sum()
+    filtered_df = df3[df3["Category"].isin(category) & df3["Subcategory"].isin(subcategory) & df3["Task"].isin(task)]
