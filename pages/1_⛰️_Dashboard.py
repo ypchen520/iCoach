@@ -3,14 +3,13 @@ import plotly.express as px
 import pandas as pd
 import os
 import warnings
-# import pyexcel_ods
+import numpy as np
 warnings.filterwarnings("ignore")
 import pendulum
 
-from google.cloud import firestore
 import json
 
-import utils
+import utils.utils as utils
 
 # credentials_path = "./adminsdk.json"
 # db = firestore.Client.from_service_account_json(credentials_path)
@@ -124,3 +123,11 @@ elif task:
     filtered_df = df3[df3["Task"].isin(task)]
 else:
     filtered_df = df3[df3["Category"].isin(category) & df3["Subcategory"].isin(subcategory) & df3["Task"].isin(task)]
+
+
+chart_data = pd.DataFrame(
+    np.random.randn(20,3),
+    columns=["a", "b", "c"]
+)
+
+st.line_chart(chart_data)

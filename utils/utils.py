@@ -1,8 +1,8 @@
 import pandas as pd
-import model
+import data_sources.model as model
 import toml
 
-constants = toml.load("constants.toml")
+# constants = toml.load("constants.toml")
 
 def upload_csv_to_db(db, file_path):
     df = pd.read_csv(file_path)
