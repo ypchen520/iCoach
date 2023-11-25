@@ -21,6 +21,29 @@ doc_ref = db.collection("User").document("eagle")
 doc_data = doc_ref.get().to_dict()
 st.write([attr for attr in model.Clothes.__dict__.keys() if not callable(getattr(model.Clothes, attr)) and not attr.startswith("__")])
 
+# ==========tracker==============
+
+# get options from fb
+category_options = ["Option 1", "Option 2", "Option 3", "Option 4"]
+subcategory_options = ["Option 1", "Option 2", "Option 3", "Option 4"]
+item_options = ["Option 1", "Option 2", "Option 3", "Option 4"]
+
+category = st.selectbox("Select options:", category_options, key=0)
+subcategory = st.selectbox("Select options:", subcategory_options, key=1)
+item = st.selectbox("Select options:", item_options + ["Add New"], key=2)
+if item == "Add New":
+    item = st.text_input("Enter new item:", key=3)
+
+with st.form("my_form"):
+    item_name = st.text_input("Enter new item:", key="name")
+    submitted = st.form_submit_button("Submit")
+    if submitted:
+        # user feedback
+        st.write(f"Item name: {item_name}")
+
+        # store to fb
+# ========================
+
 # print(doc_data)
 
 # db = firestore.Client.from_service_account_info(firestore_keys)
@@ -33,6 +56,7 @@ st.write([attr for attr in model.Clothes.__dict__.keys() if not callable(getattr
 # get options from fb
 
 # add options to fb
+
 
 # Create a multiselect widget for the user to choose options
 selected_options = st.sidebar.multiselect(
