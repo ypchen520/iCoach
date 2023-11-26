@@ -16,11 +16,15 @@ class User:
         
         pass
 
+class Productivity:
+    pass
+
 class Health:
     cardio = None
     mental = None
     resistance = None
     sport = None
+    food = None
 
 class Cardio:
     pass
