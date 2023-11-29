@@ -30,7 +30,7 @@ title_template = PromptTemplate(
 
 title_memory = ConversationBufferMemory(input_key="topic", memory_key="chat_history")
 
-llm = OpenAI(temperature=0.7, max_tokens=200, openai_api_key="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", openai_organization="org-Yi64r1Foet4RS92sLWP419ru")
+llm = OpenAI(temperature=0.7, max_tokens=200, openai_api_key="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")
 title_chain = LLMChain(llm=llm, prompt=title_template, verbose=True, output_key="title", memory=title_memory)
 
 def generate_response(prompt):
