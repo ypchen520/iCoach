@@ -19,27 +19,33 @@ from langchain.memory import ConversationBufferMemory
 from langchain.utilities import WikipediaAPIWrapper
 
 
-st.title('🦜🔗 Quickstart App')
+st.title(':speech_balloon: Chat')
+
+llm = OpenAI(temperature=0.7, max_tokens=200, openai_api_key=st.secrets["openai"]["api_key"])
 
 # Prompt template
-title_template = PromptTemplate(
-    input_variables = ['topic'],
-    template = "Write me a YouTube video title about {topic}"
-    # template = "Write me a motivational message about {topic}"
+motivation_template = PromptTemplate(
+    input_variables = ['context', 'wikipedia_search'],
+    template = "Write me a motivational message about ```{context}``` based on while leveraging this wikipedia search: {wikipedia_search}"
 )
 
-title_memory = ConversationBufferMemory(input_key="topic", memory_key="chat_history")
+wiki = WikipediaAPIWrapper()
+# motivation_theory = "growth mindset"
+motivation_theory = "stress-is-enhancing mindset"
+wikipedia_search = wiki.run(motivation_theory)
 
-llm = OpenAI(temperature=0.7, max_tokens=200, openai_api_key="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")
-title_chain = LLMChain(llm=llm, prompt=title_template, verbose=True, output_key="title", memory=title_memory)
+motivation_memory = ConversationBufferMemory(input_key="context", memory_key="chat_history")
+
+motivation_chain = LLMChain(llm=llm, prompt=motivation_template, verbose=True, output_key="motivation_msg", memory=motivation_memory)
+
 
 def generate_response(prompt):
-  st.info(prompt, icon="ℹ️")
-  res = title_chain.run(prompt)
-  st.write(res)
+  if prompt:
+    res = motivation_chain.run(context=prompt, wikipedia_search=wikipedia_search)
+    st.write(res)
 
 with st.form('my_form'):
-  text = st.text_area('Enter text:', 'What are the three key pieces of advice for learning how to code?')
+  text = st.text_area('Enter text:', '')
   submitted = st.form_submit_button('Submit')
   if submitted:
     generate_response(text)
