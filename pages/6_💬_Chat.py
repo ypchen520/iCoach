@@ -23,10 +23,16 @@ st.title(':speech_balloon: Chat')
 
 llm = OpenAI(temperature=0.7, max_tokens=200, openai_api_key=st.secrets["openai"]["api_key"])
 
+num_purposes = st.text_input("Number of purposes", key="purpose")
+
+if not num_purposes:
+    num_purposes = 1
+
 # Prompt template
 motivation_template = PromptTemplate(
-    input_variables = ['context', 'wikipedia_search'],
-    template = "Write me a motivational message about ```{context}``` based on while leveraging this wikipedia search: {wikipedia_search}"
+    input_variables = ['num_purposes', 'context', 'wikipedia_search'],
+    # template = "Write me a motivational message about ```{context}``` based on while leveraging this wikipedia search: {wikipedia_search}"
+    template = "Suggest {num_purposes} me a motivational message about ```{context}``` based on while leveraging this wikipedia search: {wikipedia_search}"
 )
 
 wiki = WikipediaAPIWrapper()
@@ -41,7 +47,7 @@ motivation_chain = LLMChain(llm=llm, prompt=motivation_template, verbose=True, o
 
 def generate_response(prompt):
   if prompt:
-    res = motivation_chain.run(context=prompt, wikipedia_search=wikipedia_search)
+    res = motivation_chain.run(num_purposes=num_purposes, context=prompt, wikipedia_search=wikipedia_search)
     st.write(res)
 
 with st.form('my_form'):
