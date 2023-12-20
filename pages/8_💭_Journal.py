@@ -22,6 +22,8 @@ import streamlit as st
 # journal
 # mood after
 # mood: happy, excited, grateful, relaxed, content, tired, unsure, bored, anxious, angry, stressed, sad
+# english
+# use LangChain for generating meaning and examples
 # """
 
 st.title(':thought_balloon: Journal')
