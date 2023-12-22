@@ -64,6 +64,7 @@ class Clothes:
     location = None
     status = None
     madein = None
+    washed = None
     def __init__(self, id=None, name=None, date=None, brand=None, color=None, type=None, freq=None, location=None):
         pass
         # self.id

@@ -101,23 +101,59 @@ with fashion_tab:
 
     # get options from fb
     # category_options = ["Option 1", "Option 2", "Option 3", "Option 4"]
-    subcategory_options = [doc.id.title() for doc in category_collection_ref.get()]
-    subcategory = st.selectbox("Select options:", subcategory_options, key=7)
+    subcategory_options = [doc.id.title() for doc in category_collection_ref.get()] + ["Add New"]
+    subcategory = st.selectbox(":hatched_chick: **Category**", subcategory_options, index=None, key="subcategory_options")
 
     item = None
 
-    if subcategory:
-        doc_id = subcategory.lower()
+    if subcategory and subcategory != "Add New":
         # st.write(category_collection_ref.document(doc_id).collections())
-        item_options = [collection.id.title() for collection in category_collection_ref.document(doc_id).collections()]
-        item = st.selectbox("Select options:", item_options, key=8)
+        item_options = [collection.id.title() for collection in category_collection_ref.document(subcategory.lower()).collections()] + ["Add New"]
+        item = st.selectbox(":hatching_chick: **Item**", item_options, index=None, key="item_options")
         # item = st.selectbox("Select options:", item_options + ["Add New"], key=8)
     # if item == "Add New":
     #     item = st.text_input("Enter new item:", key=9)
+    elif subcategory == "Add New":
+        # TODO: implement function to write to fb
+        pass
+    
+    if subcategory and item:
+        brand_options = set()
+        for doc in category_collection_ref.document(subcategory.lower()).collection(item.lower()).get():
+            brand_options.add(doc.to_dict()["brand"])
+        st.write(brand_options)
+        custom_heading_style = """
+        <style>
+            .stHeadingContainer {
+                display: flex;
+                text-align: center;
+            }
+            # }
+        </style>
+        """
+        # st.markdown(custom_style, unsafe_allow_html=True)
+        with st.form("fashion_form"):
+            st.markdown(custom_heading_style, unsafe_allow_html=True)
+            with st.container():
+                st.subheader(":paw_prints: **Record**")
+                # st.markdown("<style>div.block-container{text-align: center;}</style>", unsafe_allow_html=True)
+            # st.markdown("<style>div.block-container{text-align: center;}</style>", unsafe_allow_html=True)
+            # st.subheader(":paw_prints: **Record**")
+            # st.markdown("<style>div.block-container{text-align: left;}</style>", unsafe_allow_html=True)
+            # item_name = st.text_input("Enter new item:", key="fashion_item_form")
+            # st.write([attr for attr in model.Clothes.__dict__.keys() if not callable(getattr(model.Clothes, attr)) and not attr.startswith("__")])
+            for attr in model.Clothes.__dict__.keys():
+                if not callable(getattr(model.Clothes, attr)) and not attr.startswith("__"):
+                    if attr == "name":
+                        item_name = st.text_input(attr, key="item_name")
 
-    with st.form("fashion_form"):
-        item_name = st.text_input("Enter new item:", key="fashion_item_form")
-        submitted = st.form_submit_button("Submit")
-        if submitted:
-            # user feedback
-            st.write(f"Item name: {item_name}")
+                    st.write(attr)
+                    pass
+            
+            submitted = st.form_submit_button("Submit") # TODO: customize the button
+            if submitted:
+                # user feedback
+                item_name = "CLASS STR REPR"
+                st.write(f"Tracked item: {item_name}")
+
+    

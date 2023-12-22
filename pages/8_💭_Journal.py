@@ -39,3 +39,6 @@ st.title(':thought_balloon: Journal')
 # With some practice you can do this tastefully—only where these features make sense and help make the code more expressive.
 # And trust me, your colleagues will pick up on this after a while. If they ask you questions, be generous and helpful.
 # Pull everyone around you UP and help them learn what you know.
+
+# Create a tap for english
+# use langchain to explain the term, and then create a sentence, and then maybe a story after three logs?
