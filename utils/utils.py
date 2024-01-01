@@ -1,6 +1,7 @@
 import pandas as pd
 import data_sources.model as model
 import toml
+import streamlit as st
 
 # constants = toml.load("constants.toml")
 
@@ -26,3 +27,57 @@ def upload_csv_to_db(db, file_path):
         # print(type(row[["Date"]]))
         # print(row["Task"])
 
+def add_form(form_type="category"):
+    """
+    Add a form for input based on the form type.
+    Parameters:
+    - form_type (str): category, subcategory, brand, item.
+    - brand (str): brand name.
+    - name (str): item name.
+
+    Returns:
+    dict: The form data
+
+    Raise:
+    - ValueError:
+    """
+    custom_heading_style = """
+    <style>
+        .stHeadingContainer {
+            display: flex;
+            text-align: center;
+        }
+        # }
+    </style>
+    """
+    # Select entries based on the type of form specified
+    form_entries = []
+    for attr in model.Clothes.__dict__.keys():
+        if not callable(getattr(model.Clothes, attr)) and not attr.startswith("__") and attr != "id" and attr != "brand" and attr != "name":
+            form_entries.append(attr)
+
+    if form_type == "category":
+        form_entries = ["category", "subcategory", "brand", "name"] + form_entries
+    elif form_type == "subcategory":
+        form_entries = ["subcategory", "brand", "name"] + form_entries
+    elif form_type == "brand":
+        form_entries = ["brand", "name"] + form_entries
+    elif form_type == "item":
+        form_entries = ["name"] + form_entries
+        
+    with st.form("fashion_form"):
+        st.markdown(custom_heading_style, unsafe_allow_html=True)
+        st.subheader(":paw_prints: **Record**")
+        # category = st.text_input("category", key="category")
+        # item_name = st.text_input("name", key="item_name", placeholder="this is a placeholder", disabled=True)
+        # brand = st.text_input("brand", key="brand")
+        st.write(form_entries)
+        
+        submitted = st.form_submit_button("Submit") # TODO: customize the button
+        if submitted:
+            # user feedback
+            item_name = "CLASS STR REPR"
+            st.write(f"Tracked item: {item_name}")
+            # res is a dict
+            # TODO: use the form_entries as keys to create a dict
+            # return res

@@ -102,59 +102,18 @@ with fashion_tab:
 
     # get options from fb
     category_options = [doc.id.title() for doc in aspect_collection_ref.get()] + ["Add New"]
-    category = st.selectbox(":hatched_chick: **Category**", category_options, index=None, key="category_options")
-
-    def add_form():
-        # minimum requirement for a form to show up: "Add New" for subcategory
-        custom_heading_style = """
-        <style>
-            .stHeadingContainer {
-                display: flex;
-                text-align: center;
-            }
-            # }
-        </style>
-        """
-        # st.markdown(custom_style, unsafe_allow_html=True)
-        with st.form("fashion_form"):
-            st.markdown(custom_heading_style, unsafe_allow_html=True)
-            with st.container():
-                st.subheader(":paw_prints: **Record**")
-                # st.markdown("<style>div.block-container{text-align: center;}</style>", unsafe_allow_html=True)
-            # st.markdown("<style>div.block-container{text-align: center;}</style>", unsafe_allow_html=True)
-            # st.subheader(":paw_prints: **Record**")
-            # st.markdown("<style>div.block-container{text-align: left;}</style>", unsafe_allow_html=True)
-            # item_name = st.text_input("Enter new item:", key="fashion_item_form")
-            # st.write([attr for attr in model.Clothes.__dict__.keys() if not callable(getattr(model.Clothes, attr)) and not attr.startswith("__")])
-            for attr in model.Clothes.__dict__.keys():
-                if not callable(getattr(model.Clothes, attr)) and not attr.startswith("__"):
-                    if attr == "name":
-                        item_name = st.text_input(attr, key="item_name")
-
-                    st.write(attr)
-                    pass
-            
-            submitted = st.form_submit_button("Submit") # TODO: customize the button
-            if submitted:
-                # user feedback
-                item_name = "CLASS STR REPR"
-                st.write(f"Tracked item: {item_name}") 
+    category = st.selectbox(":hatched_chick: **Category**", category_options, index=None, key="category_options") 
 
     if category == "Add New":
-        # TODO: implement function to write to fb
-        # reuse the form, in the form I need to add item
-        # update subcategory
-        category = st.text_input("Enter new category:", key="new_category")
-        # go to form
-        if category != "Add New":
-            add_form()
+        utils.add_form("category") # TODO: pass argument to decide the type of the form
     elif category:
         # if it's a new subcategory, we won't have an item for it
         # st.write(category_collection_ref.document(doc_id).collections())
         subcategory_options = [collection.id.title() for collection in aspect_collection_ref.document(category.lower()).collections()] + ["Add New"]
         subcategory = st.selectbox(":hatching_chick: **Subcategory**", subcategory_options, index=None, key="subcategory_options")
         if subcategory == "Add New":
-            subcategory = st.text_input("Enter new subcategory:", key="new_subcategory")
+            # subcategory = st.text_input("Enter new subcategory:", key="new_subcategory")
+            utils.add_form("subcategory") # TODO: pass argument to decide the type of the form
         elif subcategory:
             brand_options = set()
             for doc in aspect_collection_ref.document(category.lower()).collection(subcategory.lower()).get():
@@ -162,47 +121,17 @@ with fashion_tab:
             brand_options = list(brand_options) + ["Add New"]
             brand = st.selectbox(":shirt: **Brand**", brand_options, index=None, key="brand_options")
             if brand == "Add New":
-                brand = st.text_input("Enter new brand:", key="new_brand")
+                utils.add_form("brand")
             elif brand:
                 # filter fb with brand, list the items
                 # item_options = [doc.to_dict()["name"] for doc in aspect_collection_ref.document(category.lower()).collection(subcategory.lower()).get() if doc.to_dict()["brand"] == brand]
-                item_options = [doc.to_dict()["name"] for doc in aspect_collection_ref.document(category.lower()).collection(subcategory.lower()).where("brand", "==", brand).stream()]
-                st.write(item_options)
-          
-    # if category:
-    #     # minimum requirement for a form to show up: "Add New" for subcategory
-    #     custom_heading_style = """
-    #     <style>
-    #         .stHeadingContainer {
-    #             display: flex;
-    #             text-align: center;
-    #         }
-    #         # }
-    #     </style>
-    #     """
-    #     # st.markdown(custom_style, unsafe_allow_html=True)
-    #     with st.form("fashion_form"):
-    #         st.markdown(custom_heading_style, unsafe_allow_html=True)
-    #         with st.container():
-    #             st.subheader(":paw_prints: **Record**")
-    #             # st.markdown("<style>div.block-container{text-align: center;}</style>", unsafe_allow_html=True)
-    #         # st.markdown("<style>div.block-container{text-align: center;}</style>", unsafe_allow_html=True)
-    #         # st.subheader(":paw_prints: **Record**")
-    #         # st.markdown("<style>div.block-container{text-align: left;}</style>", unsafe_allow_html=True)
-    #         # item_name = st.text_input("Enter new item:", key="fashion_item_form")
-    #         # st.write([attr for attr in model.Clothes.__dict__.keys() if not callable(getattr(model.Clothes, attr)) and not attr.startswith("__")])
-    #         for attr in model.Clothes.__dict__.keys():
-    #             if not callable(getattr(model.Clothes, attr)) and not attr.startswith("__"):
-    #                 if attr == "name":
-    #                     item_name = st.text_input(attr, key="item_name")
-
-    #                 st.write(attr)
-    #                 pass
-            
-    #         submitted = st.form_submit_button("Submit") # TODO: customize the button
-    #         if submitted:
-    #             # user feedback
-    #             item_name = "CLASS STR REPR"
-    #             st.write(f"Tracked item: {item_name}")
-
-    
+                item_options = [doc.to_dict()["name"] for doc in aspect_collection_ref.document(category.lower()).collection(subcategory.lower()).where("brand", "==", brand).stream()] + ["Add New"]
+                item_name = st.selectbox("**Name**", item_options, index=None, key="item_options")
+                if item_name == "Add New":
+                    utils.add_form("item")
+                elif item_name:
+                    for doc in aspect_collection_ref.document(category.lower()).collection(subcategory.lower()).where("brand", "==", brand).where("name", "==", item_name).stream():
+                        st.write(doc.to_dict())
+                    # TODO: based on the category, subcategory, brand, item, get the data from fb using read_from_db method of the Clothes class and populate the form
+                    # in this case, we have existing data, and the user is trying to update it.
+    # TODO: based on the submitted form, write to the db using write_to_db method of the Clothes class (the class depends on the category)

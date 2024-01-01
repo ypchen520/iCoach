@@ -62,8 +62,10 @@ class Clothes:
     type = None
     frequency = None
     location = None
-    status = None
+    # status = None
     madein = None
+    count = None
+    owned = None # how many years have I owned this item
     washed = None
     def __init__(self, id=None, name=None, date=None, brand=None, color=None, type=None, freq=None, location=None):
         pass
@@ -76,7 +78,9 @@ class Clothes:
         # self.type = type
         # self.frequency = freq
     def read_from_db():
+        # this should be inherited from a parent class
         pass
 
     def write_to_db():
+        # this should be inherited from a parent class
         pass
