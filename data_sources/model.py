@@ -1,3 +1,17 @@
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from datetime import datetime
+
+@dataclass
+class Item(ABC):
+    @abstractmethod
+    def read_from_db():
+        raise NotImplementedError
+    
+    @abstractmethod
+    def write_to_db():
+        raise NotImplementedError
+
 class User:
     id = None
 
@@ -52,21 +66,21 @@ class Task:
     def __str__(self):
         pass
 
-class Clothes:
-    id = None
-    name = None
-    date = None
-    last_time = None
-    brand = None
-    color = None
-    type = None
-    frequency = None
-    location = None
+class Clothes(Item):
+    id: str
+    name: str
+    date: datetime
+    last_time: datetime
+    brand: str
+    color: str
+    type: str
+    frequency: int
+    location: dict
     # status = None
-    madein = None
-    count = None
-    owned = None # how many years have I owned this item
-    washed = None
+    madein: str
+    count: int
+    owned: int # how many years have I owned this item
+    washed: int
     def __init__(self, id=None, name=None, date=None, brand=None, color=None, type=None, freq=None, location=None):
         pass
         # self.id
@@ -77,10 +91,8 @@ class Clothes:
         # self.color = color
         # self.type = type
         # self.frequency = freq
-    def read_from_db():
-        # this should be inherited from a parent class
-        pass
+    def read_from_db(self):
+        print("read")
 
-    def write_to_db():
-        # this should be inherited from a parent class
-        pass
+    def write_to_db(self):
+        print("write")

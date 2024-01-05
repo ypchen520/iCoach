@@ -135,3 +135,23 @@ with fashion_tab:
                     # TODO: based on the category, subcategory, brand, item, get the data from fb using read_from_db method of the Clothes class and populate the form
                     # in this case, we have existing data, and the user is trying to update it.
     # TODO: based on the submitted form, write to the db using write_to_db method of the Clothes class (the class depends on the category)
+    text_clothes = model.Clothes()
+    for attr, data_type in text_clothes.__annotations__.items():
+        if data_type == str:
+            st.write(f"{attr} is a string")
+        # if data_type == str:
+        #     st.write(attr, getattr(text_clothes, attr))
+        # elif data_type == int:
+        #     st.write(attr, getattr(text_clothes, attr))
+        # elif data_type == float:
+        #     st.write(attr, getattr(text_clothes, attr))
+        # elif data_type == bool:
+        #     st.write(attr, getattr(text_clothes, attr))
+        # elif data_type == list:
+        #     st.write(attr, getattr(text_clothes, attr))
+        # elif data_type == dict:
+        #     st.write(attr, getattr(text_clothes, attr))
+        # else:
+        #     st.write(attr, getattr(text_clothes, attr))
+        #     st.write(data_type)
+        #     st.write("Not supported")

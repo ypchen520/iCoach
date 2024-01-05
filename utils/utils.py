@@ -27,7 +27,7 @@ def upload_csv_to_db(db, file_path):
         # print(type(row[["Date"]]))
         # print(row["Task"])
 
-def add_form(form_type="category"):
+def add_form(form_type="category", item=None):
     """
     Add a form for input based on the form type.
     Parameters:
@@ -53,7 +53,7 @@ def add_form(form_type="category"):
     # Select entries based on the type of form specified
     form_entries = []
     for attr in model.Clothes.__dict__.keys():
-        if not callable(getattr(model.Clothes, attr)) and not attr.startswith("__") and attr != "id" and attr != "brand" and attr != "name":
+        if not callable(getattr(model.Clothes, attr)) and not attr.startswith("_") and not attr.startswith("__") and attr != "id" and attr != "brand" and attr != "name":
             form_entries.append(attr)
 
     if form_type == "category":
@@ -64,14 +64,36 @@ def add_form(form_type="category"):
         form_entries = ["brand", "name"] + form_entries
     elif form_type == "item":
         form_entries = ["name"] + form_entries
-        
+    elif form_type == "update":
+        if not item:
+            raise ValueError("An existing item should be provided for updating")
+    
     with st.form("fashion_form"):
         st.markdown(custom_heading_style, unsafe_allow_html=True)
         st.subheader(":paw_prints: **Record**")
         # category = st.text_input("category", key="category")
         # item_name = st.text_input("name", key="item_name", placeholder="this is a placeholder", disabled=True)
         # brand = st.text_input("brand", key="brand")
-        st.write(form_entries)
+        # 0:"category"
+        # 1:"subcategory"
+        # 2:"brand"
+        # 3:"name"
+        # 4:"date"
+        # 5:"last_time"
+        # 6:"color"
+        # 7:"type"
+        # 8:"frequency"
+        # 9:"location"
+        # 10:"madein"
+        # 11:"count"
+        # 12:"owned"
+        # 13:"washed"
+        result_dict = {}
+        for entry in form_entries:
+            if entry in {"date", "last_time"}:
+                result_dict[entry] = st.date_input(entry)
+            st.text_input(entry)
+            
         
         submitted = st.form_submit_button("Submit") # TODO: customize the button
         if submitted:
