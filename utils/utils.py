@@ -2,6 +2,7 @@ import pandas as pd
 import data_sources.model as model
 import toml
 import streamlit as st
+from datetime import datetime
 
 # constants = toml.load("constants.toml")
 
@@ -29,7 +30,7 @@ def upload_csv_to_db(db, file_path):
 
 def add_form(form_type="category", item=None):
     """
-    Add a form for input based on the form type.
+    Add a form for input based on the form type. Currently only supports the Fashion/Clothes category.
     Parameters:
     - form_type (str): category, subcategory, brand, item.
     - brand (str): brand name.
@@ -52,8 +53,12 @@ def add_form(form_type="category", item=None):
     """
     # Select entries based on the type of form specified
     form_entries = []
-    for attr in model.Clothes.__dict__.keys():
-        if not callable(getattr(model.Clothes, attr)) and not attr.startswith("_") and not attr.startswith("__") and attr != "id" and attr != "brand" and attr != "name":
+    ### model.Clothes.__annotations__
+    # for attr in model.Clothes.__dict__.keys():
+    #     if not callable(getattr(model.Clothes, attr)) and not attr.startswith("_") and not attr.startswith("__") and attr != "id" and attr != "brand" and attr != "name":
+    #         form_entries.append(attr)
+    for attr in model.Clothes.__dict__["__annotations__"].keys():
+        if attr != "id" and attr != "brand" and attr != "name":
             form_entries.append(attr)
 
     if form_type == "category":
@@ -90,9 +95,18 @@ def add_form(form_type="category", item=None):
         # 13:"washed"
         result_dict = {}
         for entry in form_entries:
-            if entry in {"date", "last_time"}:
-                result_dict[entry] = st.date_input(entry)
-            st.text_input(entry)
+            if entry in {"category", "subcategory", "brand", "name"}:
+                result_dict[entry] = st.text_input(entry)
+            else:
+                if model.Clothes.__annotations__[entry] == str:
+                    result_dict[entry] = st.text_input(entry)
+                elif model.Clothes.__annotations__[entry] == int:
+                    result_dict[entry] = st.number_input(entry)
+                elif model.Clothes.__annotations__[entry] == datetime:
+                    result_dict[entry] = st.date_input(entry)
+                elif model.Clothes.__annotations__[entry] == dict:
+                    # TODO: multiselect?
+                    pass
             
         
         submitted = st.form_submit_button("Submit") # TODO: customize the button
