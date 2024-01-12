@@ -5,6 +5,7 @@ from data_sources import firebase
 from data_sources import model
 from utils import utils
 import logging
+from google.cloud.firestore_v1.base_query import FieldFilter, BaseCompositeFilter
 
 # """
 # Page config
@@ -103,36 +104,40 @@ with fashion_tab:
     # get options from fb
     category_options = [doc.id.title() for doc in aspect_collection_ref.get()] + ["Add New"]
     category = st.selectbox(":hatched_chick: **Category**", category_options, index=None, key="category_options") 
-
+    result = None
     if category == "Add New":
-        utils.add_form("category") # TODO: pass argument to decide the type of the form
+        result = utils.add_form("category", user_ref=user_doc_ref)
     elif category:
-        # if it's a new subcategory, we won't have an item for it
-        # st.write(category_collection_ref.document(doc_id).collections())
-        subcategory_options = [collection.id.title() for collection in aspect_collection_ref.document(category.lower()).collections()] + ["Add New"]
+        category_doc_ref = aspect_collection_ref.document(category.lower())
+        subcategory_options = [collection.id.title() for collection in category_doc_ref.collections()] + ["Add New"]
         subcategory = st.selectbox(":hatching_chick: **Subcategory**", subcategory_options, index=None, key="subcategory_options")
         if subcategory == "Add New":
-            # subcategory = st.text_input("Enter new subcategory:", key="new_subcategory")
-            utils.add_form("subcategory") # TODO: pass argument to decide the type of the form
+            result = utils.add_form("subcategory", user_ref=user_doc_ref)
         elif subcategory:
+            subcategory_collection_ref = category_doc_ref.collection(subcategory.lower())
             brand_options = set()
-            for doc in aspect_collection_ref.document(category.lower()).collection(subcategory.lower()).get():
+            for doc in subcategory_collection_ref.get():
                 brand_options.add(doc.to_dict()["brand"])
             brand_options = list(brand_options) + ["Add New"]
             brand = st.selectbox(":shirt: **Brand**", brand_options, index=None, key="brand_options")
             if brand == "Add New":
-                utils.add_form("brand")
+                result = utils.add_form("brand", user_ref=user_doc_ref)
             elif brand:
                 # filter fb with brand, list the items
-                # item_options = [doc.to_dict()["name"] for doc in aspect_collection_ref.document(category.lower()).collection(subcategory.lower()).get() if doc.to_dict()["brand"] == brand]
-                item_options = [doc.to_dict()["name"] for doc in aspect_collection_ref.document(category.lower()).collection(subcategory.lower()).where("brand", "==", brand).stream()] + ["Add New"]
+                queries = [FieldFilter("brand", "==", brand)]
+                item_options = [doc.to_dict()["name"] for doc in subcategory_collection_ref.where(filter=BaseCompositeFilter("AND", queries)).stream()] + ["Add New"]
                 item_name = st.selectbox("**Name**", item_options, index=None, key="item_options")
                 if item_name == "Add New":
-                    utils.add_form("item")
+                    result = utils.add_form("item", user_ref=user_doc_ref) # , items={"brand": brand}
                 elif item_name:
-                    for doc in aspect_collection_ref.document(category.lower()).collection(subcategory.lower()).where("brand", "==", brand).where("name", "==", item_name).stream():
-                        st.write(doc.to_dict())
-                    # TODO: based on the category, subcategory, brand, item, get the data from fb using read_from_db method of the Clothes class and populate the form
-                    # in this case, we have existing data, and the user is trying to update it.
-    # TODO: based on the submitted form, write to the db using write_to_db method of the Clothes class (the class depends on the category)
-    
+                    # for doc in subcategory_collection_ref.where("brand", "==", brand).where("name", "==", item_name).stream():
+                    #     st.write(doc.to_dict())
+                    queries.append(FieldFilter("name", "==", item_name))
+                    docs = subcategory_collection_ref.where(filter=BaseCompositeFilter("AND", queries)).stream()
+                    # docs = subcategory_collection_ref.where("brand", "==", brand).where("name", "==", item_name).stream()
+                    existing_item = model.Clothes()
+                    existing_item.read_from_db(next(docs))
+                    result = utils.add_form("update", user_ref=user_doc_ref, items=existing_item.__dict__)
+                    if result:
+                        # TODO: probably should do some sort of async implementation
+                        existing_item.write_to_db(collection_ref=subcategory_collection_ref, data=result, existing=True)

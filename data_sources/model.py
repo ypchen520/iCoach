@@ -91,8 +91,16 @@ class Clothes(Item):
         # self.color = color
         # self.type = type
         # self.frequency = freq
-    def read_from_db(self):
-        print("read")
+    def read_from_db(self, doc):
+        self.id = doc.id
+        data = doc.to_dict()
+        for key, value in data.items():
+            setattr(self, key, value)
 
-    def write_to_db(self):
-        print("write")
+    def write_to_db(self, collection_ref=None, data=None, existing=False):
+        if not collection_ref:
+            raise ValueError("A Firestore collection reference is required")
+        if not data:
+            raise ValueError("Data is required")
+        if existing:
+            collection_ref.document(self.id).update(data)

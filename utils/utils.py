@@ -1,10 +1,10 @@
 import pandas as pd
-import data_sources.model as model
-import toml
+from data_sources import model
 import streamlit as st
-from datetime import datetime
+from datetime import datetime, time
+import pytz
 
-# constants = toml.load("constants.toml")
+timezone= pytz.timezone("America/New_York")
 
 def upload_csv_to_db(db, file_path):
     df = pd.read_csv(file_path)
@@ -28,7 +28,7 @@ def upload_csv_to_db(db, file_path):
         # print(type(row[["Date"]]))
         # print(row["Task"])
 
-def add_form(form_type="category", item=None):
+def add_form(form_type="category", user_ref=None, items=None):
     """
     Add a form for input based on the form type. Currently only supports the Fashion/Clothes category.
     Parameters:
@@ -70,50 +70,43 @@ def add_form(form_type="category", item=None):
     elif form_type == "item":
         form_entries = ["name"] + form_entries
     elif form_type == "update":
-        if not item:
+        form_entries = ["name"] + form_entries
+        if not items:
             raise ValueError("An existing item should be provided for updating")
     
     with st.form("fashion_form"):
         st.markdown(custom_heading_style, unsafe_allow_html=True)
         st.subheader(":paw_prints: **Record**")
-        # category = st.text_input("category", key="category")
-        # item_name = st.text_input("name", key="item_name", placeholder="this is a placeholder", disabled=True)
-        # brand = st.text_input("brand", key="brand")
-        # 0:"category"
-        # 1:"subcategory"
-        # 2:"brand"
-        # 3:"name"
-        # 4:"date"
-        # 5:"last_time"
-        # 6:"color"
-        # 7:"type"
-        # 8:"frequency"
-        # 9:"location"
-        # 10:"madein"
-        # 11:"count"
-        # 12:"owned"
-        # 13:"washed"
         result_dict = {}
         for entry in form_entries:
-            if entry in {"category", "subcategory", "brand", "name"}:
+            if entry in {"category", "subcategory", "brand"}:
                 result_dict[entry] = st.text_input(entry)
             else:
                 if model.Clothes.__annotations__[entry] == str:
-                    result_dict[entry] = st.text_input(entry)
+                    result_dict[entry] = st.text_input(entry, value=items[entry], placeholder=items[entry]) if items and entry in items else st.text_input(entry)
                 elif model.Clothes.__annotations__[entry] == int:
-                    result_dict[entry] = st.number_input(entry)
+                    result_dict[entry] = st.number_input(entry, value=items[entry], placeholder=items[entry]) if items and entry in items else st.text_input(entry)
                 elif model.Clothes.__annotations__[entry] == datetime:
-                    result_dict[entry] = st.date_input(entry)
+                    if not items:
+                        result_dict[entry] = st.date_input(entry)
+                    elif entry in items:
+                        result_dict[entry] = st.date_input(entry, value=items[entry])
+                        result_dict[entry] = datetime.combine(result_dict[entry], datetime.min.time()).astimezone(timezone)
                 elif model.Clothes.__annotations__[entry] == dict:
-                    # TODO: multiselect?
-                    pass
-            
+                    if items and entry in items:
+                        result_dict[entry] = st.multiselect(entry, items[entry].keys())
+                    elif user_ref:
+                        result_dict[entry] = st.multiselect(entry, list(user_ref.get().to_dict()[entry]))
+                    else:
+                        result_dict[entry] = st.text_input(entry)
+                        
         
         submitted = st.form_submit_button("Submit") # TODO: customize the button
         if submitted:
+            return result_dict
             # user feedback
-            item_name = "CLASS STR REPR"
-            st.write(f"Tracked item: {item_name}")
+            # item_name = "CLASS STR REPR"
+            # st.write(f"Tracked item: {item_name}")
             # res is a dict
             # TODO: use the form_entries as keys to create a dict
             # return res
