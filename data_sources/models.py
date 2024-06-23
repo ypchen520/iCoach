@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Optional, Dict
 
 @dataclass
 class Item(ABC):
@@ -65,6 +66,28 @@ class Task:
         self.date = date
     def __str__(self):
         pass
+
+class Resistance(Item):
+    # date: datetime
+    # count: int
+    def __init__(self, date: datetime, count: int, id: Optional[str] = None):
+        self.id = id
+        self.date = date
+        self.count = count
+    
+    def read_from_db(self, doc):
+        self.id = doc.id
+        data = doc.to_dict()
+        for key, value in data.items():
+            setattr(self, key, value)
+
+    def write_to_db(self, collection_ref=None, data=None, existing=False):
+        if not collection_ref:
+            raise ValueError("A Firestore collection reference is required")
+        if not data:
+            raise ValueError("Data is required")
+        if existing:
+            collection_ref.document(self.id).update(data)
 
 class Clothes(Item):
     id: str

@@ -85,49 +85,66 @@ with col1:
 with col2:
     date2 = pd.to_datetime(st.date_input("End Date", endDate))
 
-df = df[(pd.to_datetime(df["Date"]) >= date1) & (pd.to_datetime(df["Date"]) <= date2)].copy()
+df_time = df[(pd.to_datetime(df["Date"]) >= date1) & (pd.to_datetime(df["Date"]) <= date2)].copy()
 
 st.sidebar.header(":mag: View")
 
-category = st.sidebar.multiselect(":seedling: Root", df["Category"].unique())
+# category = st.sidebar.multiselect(":seedling: Root", df_time["Category"].unique())
+# if not category:
+#     df2 = df_time.copy()
+# else:
+#     df2 = df_time[df_time["Category"].isin(category)] # multiselect: using isin instead of "=="
+category = st.sidebar.selectbox(":seedling: Root", df_time["Category"].unique())
 if not category:
-    df2 = df.copy()
+    df_category = df_time.copy()
 else:
-    df2 = df[df["Category"].isin(category)] # multiselect: using isin instead of "=="
+    df_category = df_time[df_time["Category"] == category] # multiselect: using isin instead of "=="
 
-subcategory = st.sidebar.multiselect(":wood: Branch", df2["Subcategory"].unique())
+# subcategory = st.sidebar.multiselect(":wood: Branch", df2["Subcategory"].unique())
+# if not subcategory:
+#     df3 = df2.copy()
+# else:
+#     df3 = df2[df2["Subcategory"].isin(subcategory)]
+subcategory = st.sidebar.selectbox(":wood: Branch", df_category["Subcategory"].unique())
 if not subcategory:
-    df3 = df2.copy()
+    df_subcategory = df_category.copy()
 else:
-    df3 = df2[df2["Subcategory"].isin(subcategory)]
+    df_subcategory = df_category[df_category["Subcategory"] == subcategory]
 
 
-task = st.sidebar.multiselect(":four_leaf_clover: Leaf", df3["Task"].unique())
-# print(type(task))
+# task = st.sidebar.multiselect(":four_leaf_clover: Leaf", df3["Task"].unique())
+tasks = st.sidebar.multiselect(":four_leaf_clover: Leaf", df_subcategory["Task"].unique())
 
-# Filter the data based on Category, Subcategory and Task
+_NUM_GRAPH_COLS = 2
 
-if not category and not subcategory and not task:
-    filtered_df = df.copy()
-elif not subcategory and not task:
-    filtered_df = df2.copy()
-elif not category and not task:
-    filtered_df = df[df["Subcategory"].isin(subcategory)]
-elif subcategory and task:
-    filtered_df = df3[df["Subcategory"].isin(subcategory) & df["Task"].isin(task)]
-elif category and task:
-    filtered_df = df3[df["Category"].isin(category) & df3["Task"].isin(task)]
-elif category and subcategory:
-    filtered_df = df3[df["Category"].isin(category) & df3["Subcategory"].isin(subcategory)]
-elif task:
-    filtered_df = df3[df3["Task"].isin(task)]
-else:
-    filtered_df = df3[df3["Category"].isin(category) & df3["Subcategory"].isin(subcategory) & df3["Task"].isin(task)]
+rows = [tasks[i:i+_NUM_GRAPH_COLS] for i in range(0, len(tasks), _NUM_GRAPH_COLS)]
+# st.write(rows)
+for row in rows:
+    cols = st.columns(_NUM_GRAPH_COLS)
+    for col, task in zip(cols, row):
+        # chart_data = pd.DataFrame(
+        #     np.random.randn(20,3),
+        #     columns=["a", "b", "c"]
+        # )
+        with col:
+            st.write(task)
+            df_task = df_subcategory[df_subcategory["Task"] == task]
+            df_plot = df_task[["Date", "Count"]]
 
+            # Ensure the Date column is of datetime type
+            df_plot['Date'] = pd.to_datetime(df_plot['Date'])
 
-chart_data = pd.DataFrame(
-    np.random.randn(20,3),
-    columns=["a", "b", "c"]
-)
+            # Sort the DataFrame by Date
+            df_plot.sort_values('Date', inplace=True)
 
-st.line_chart(chart_data)
+            # Set the Date column as the index
+            # df_plot.set_index('Date', inplace=True)
+
+            # Convert string to int
+            df_plot['Count'] = df_plot['Count'].astype(int)
+            
+            # st.line_chart(df_plot["Count"])
+
+            st.line_chart(df_plot, x="Date", y="Count", use_container_width=True)
+
+            # st.write(df_plot["Count"])
