@@ -3,6 +3,9 @@ from st_circular_progress import CircularProgress
 import base64
 import pendulum
 import time
+from utils import sprite
+
+sprite.add_character_sprite("assets/Knights/Troops/Warrior/Purple/Warrior_Purple.png", position="bottom-right")
 
 # tabs: daily, weekly, monthly
 daily_tab, weekly_tab, monthly_tab = st.tabs([":sunny: Daily", ":calendar: Weekly", ":full_moon: Monthly"])
@@ -32,7 +35,7 @@ def set_bg_hack(main_bg):
     )
 
 # Load and display image
-image_path = "images/high-above.jpeg" 
+image_path = "assets/high-above.jpeg" 
 set_bg_hack(image_path)
 
 with daily_tab:
