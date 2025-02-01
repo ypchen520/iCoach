@@ -1,7 +1,14 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional, Dict
+
+@dataclass
+class JournalEntry:
+    date: date
+    mood_before: list[str]
+    reflection: str
+    mood_after: list[str]
 
 @dataclass
 class Item(ABC):
