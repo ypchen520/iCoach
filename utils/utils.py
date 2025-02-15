@@ -3,8 +3,29 @@ from data_sources import models
 import streamlit as st
 from datetime import datetime, time
 import pytz
+import base64
 
 timezone= pytz.timezone("America/New_York")
+
+def set_bg(main_bg):
+    """
+    A function to set the background image of the app.
+    """
+    main_bg_ext = main_bg.split(".")[-1]
+
+    b64_main_bg = base64.b64encode(open(main_bg, "rb").read()).decode("utf-8")
+
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("data:image/{main_bg_ext};base64,{b64_main_bg}");
+            background-size: cover;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
 def upload_csv_to_db(db, file_path):
     df = pd.read_csv(file_path)
