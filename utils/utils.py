@@ -5,7 +5,24 @@ from datetime import datetime, time
 import pytz
 import base64
 
-timezone= pytz.timezone("America/New_York")
+timezone = pytz.timezone("America/New_York")
+
+def rate_initial_mood(moods, mood_emojies, toggle_mood, session_state_mood_buttons, session_state_initial_moods):
+    with st.container():
+    # st.markdown(col_style, unsafe_allow_html=True)
+        for i in range(len(moods)):
+            row = moods[i]
+            ncols = len(row)
+            cols = st.columns(ncols, gap="small", vertical_alignment="center", border=True)
+            for j in range(ncols):
+                mood = moods[i][j]
+                emoji = mood_emojies[i][j]
+                if session_state_mood_buttons[mood]:
+                    session_state_initial_moods.add(mood)
+                    cols[j].button(mood, key=mood, icon=emoji, use_container_width=True, type="primary", on_click=toggle_mood, args=(mood, session_state_mood_buttons))
+                else:
+                    session_state_initial_moods.discard(mood)
+                    cols[j].button(mood, key=mood, icon=emoji, use_container_width=True, type="tertiary", on_click=toggle_mood, args=(mood, session_state_mood_buttons))
 
 def set_bg(main_bg):
     """

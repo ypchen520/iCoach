@@ -1,13 +1,54 @@
 import streamlit as st
 from st_circular_progress import CircularProgress
 import base64
+import math
 # import pendulum
 # import time
 from utils import sprite, utils, clock, auth
 
+st.set_page_config(layout="wide")
+
+# Function to calculate level based on experience
+def calculate_level(exp):
+    # Simple level formula: level = sqrt(exp / 100)
+    return math.floor(math.sqrt(exp / 100)) + 1
+
+# Function to calculate experience percentage to next level
+def calculate_exp_percentage(exp):
+    current_level = calculate_level(exp)
+    exp_needed_for_current = 100 * (current_level - 1) ** 2
+    exp_needed_for_next = 100 * current_level ** 2
+    
+    exp_in_current_level = exp - exp_needed_for_current
+    exp_to_next_level = exp_needed_for_next - exp_needed_for_current
+    
+    return min(100, (exp_in_current_level / exp_to_next_level) * 100)
+
 auth.authenticate()
 
-sprite.add_character_sprite("assets/Knights/Troops/Warrior/Purple/Warrior_Purple.png", position="bottom-right")
+sprite_sheet_path = "assets/Knights/Troops/Warrior/Purple/Warrior_Purple.png"
+
+total_exp = 50
+
+# Calculate level and experience percentage
+level = calculate_level(total_exp)
+exp_percentage = calculate_exp_percentage(total_exp)
+
+# Calculate "life"
+num_prev_todo = 7
+num_prev_done = 3
+curr_life = 100 # pull from firestore
+
+life_percentage = min(100, int(curr_life - (1-(num_prev_done / num_prev_todo)) * 100))
+
+
+# Display character with circular progress bars
+sprite.display_character_with_progress(
+    sprite_sheet_path, 
+    exp_percentage,
+    life_percentage,
+    level
+)
 
 # tabs: daily, weekly, monthly
 daily_tab, weekly_tab, monthly_tab = st.tabs([":sunny: Daily", ":calendar: Weekly", ":full_moon: Monthly"])

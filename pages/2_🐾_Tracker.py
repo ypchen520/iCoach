@@ -20,7 +20,8 @@ st.set_page_config(page_title="Tracker", page_icon=":paw_prints:", layout="wide"
 # Get db
 # """
 db = firebase.get_firestore_client()
-user_doc_ref = db.collection("User").document("eagle")
+user_id = "eagle"
+user_doc_ref = db.collection("User").document(user_id)
 
 
 # """
@@ -84,6 +85,39 @@ if st.button(":rocket: Upload", type="primary"):
 # Tabs
 # """
 
+# st.write(datetime.now().time())
+timezone = pytz.timezone("America/New_York")
+
+datetime_obj = datetime(2025, 2, 24, 8, 0, 0)
+st.write(datetime_obj)
+
+# Define mood options
+moods = [
+    ["Happy", "Excited", "Grateful"],
+    ["Relaxed", "Content", "Tired"],
+    ["Unsure", "Bored", "Anxious"],
+    ["Angry", "Stressed", "Sad"]
+]
+
+mood_emojies = [
+    ["😊", "🤩", "🙏"],
+    ["😌", "🙂", "🥱"],
+    ["🤔", "😐", "😬"],
+    ["😤", "😣", "😢"]
+]
+
+if 'initial_mood' not in st.session_state:
+    st.session_state.initial_mood = set()
+
+if 'mood_buttons' not in st.session_state:
+    st.session_state.mood_buttons = {mood: False for mood in [mood for row in moods for mood in row]}
+
+if 'final_mood' not in st.session_state:
+    st.session_state.final_mood = set()
+
+if 'final_mood_buttons' not in st.session_state:
+    st.session_state.final_mood_buttons = {mood: False for mood in [mood for row in moods for mood in row]}
+
 health_tab, career_tab, fashion_tab = st.tabs([":broccoli: Health", ":rocket: Career", ":dark_sunglasses: Fashion"])
 
 with health_tab:
@@ -94,26 +128,42 @@ with health_tab:
     health_item = None
 
     # get options from fb
-    health_category_options = [doc.id.title() for doc in health_aspect_collection_ref.get()] + ["Add New"]
+    # health_category_options = [doc.id.title() for doc in health_aspect_collection_ref.get()] + ["Add New"]
+    health_category_options = [doc.id.title() for doc in health_aspect_collection_ref.get()]
     health_category = st.selectbox(":hatched_chick: **Category**", health_category_options, index=None, key="health_category_options") 
     result = None
-    if health_category == "Add New":
-        result = utils.add_form("category", user_ref=user_doc_ref)
-    elif health_category:
+    # if health_category == "Add New":
+    #     result = utils.add_form("category", user_ref=user_doc_ref)
+    if health_category:
         health_category_doc_ref = health_aspect_collection_ref.document(health_category.lower())
-        health_subcategory_options = [collection.id.title() for collection in health_category_doc_ref.collections()] + ["Add New"]
+        # health_subcategory_options = [collection.id.title() for collection in health_category_doc_ref.collections()] + ["Add New"]
+        health_subcategory_options = [collection.id.title() for collection in health_category_doc_ref.collections()]
         health_subcategory = st.selectbox(":hatching_chick: **Subcategory**", health_subcategory_options, index=None, key="health_subcategory_options")
-        if health_subcategory == "Add New":
-            result = utils.add_form("subcategory", user_ref=user_doc_ref)
-        elif health_subcategory:
+        # if health_subcategory == "Add New":
+        #     result = utils.add_form("subcategory", user_ref=user_doc_ref)
+        if health_subcategory:
             subcategory_collection_ref = health_category_doc_ref.collection(health_subcategory.lower())
             health_date_options = set()
             for doc in subcategory_collection_ref.get():
                 health_date_options.add(get_date(doc.to_dict()["date"]))
+            # health_date_options = ["Add New"] + list(health_date_options)
             health_date_options = ["Add New"] + list(health_date_options)
             health_date = st.selectbox(":date: **Date**", health_date_options, index=None, key="health_date_options")
             if health_date == "Add New":
-                pass
+                date = st.date_input("Date", value="today")
+                count = st.number_input("Count")
+                st.markdown("<style>button {float: right}</style>", unsafe_allow_html=True)
+                if date and count and st.button("Save", icon=":material/mood:"):
+                    # datetime_obj = datetime.combine(date, datetime.time(8, 0, 0)).astimezone(timezone)
+                    datetime_obj = datetime(date.year, date.month, date.day, 8, 0, 0).astimezone(timezone)
+                    entry = models.ResistanceEntry(
+                        date=datetime_obj,
+                        count=count,
+                    )
+
+                    doc_id = entry.date.isoformat()
+                    subcategory_collection_ref.document(doc_id).set(entry.__dict__)
+                    st.success(f"{health_subcategory} entry saved!")
                 # result = utils.add_form("resistance", user_ref=user_doc_ref)
             elif health_date:
                 pass

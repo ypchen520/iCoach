@@ -1,6 +1,7 @@
 from data_sources import firebase, models
 import datetime
 import streamlit as st
+from utils import utils
 
 # col1, col2, col3 = st.columns(3, gap="small")
 
@@ -94,22 +95,23 @@ if 'final_mood' not in st.session_state:
 if 'final_mood_buttons' not in st.session_state:
     st.session_state.final_mood_buttons = {mood: False for mood in [mood for row in moods for mood in row]}
 
+utils.rate_initial_mood(moods, mood_emojies, toggle_mood, st.session_state.mood_buttons, st.session_state.initial_mood)
 
-with st.container():
-    # st.markdown(col_style, unsafe_allow_html=True)
-    for i in range(len(moods)):
-        row = moods[i]
-        ncols = len(row)
-        cols = st.columns(ncols, gap="small", vertical_alignment="center", border=True)
-        for j in range(ncols):
-            mood = moods[i][j]
-            emoji = mood_emojies[i][j]
-            if st.session_state.mood_buttons[mood]:
-                st.session_state.initial_mood.add(mood)
-                cols[j].button(mood, key=mood, icon=emoji, use_container_width=True, type="primary", on_click=toggle_mood, args=(mood, st.session_state.mood_buttons))
-            else:
-                st.session_state.initial_mood.discard(mood)
-                cols[j].button(mood, key=mood, icon=emoji, use_container_width=True, type="tertiary", on_click=toggle_mood, args=(mood, st.session_state.mood_buttons))
+# with st.container():
+#     # st.markdown(col_style, unsafe_allow_html=True)
+#     for i in range(len(moods)):
+#         row = moods[i]
+#         ncols = len(row)
+#         cols = st.columns(ncols, gap="small", vertical_alignment="center", border=True)
+#         for j in range(ncols):
+#             mood = moods[i][j]
+#             emoji = mood_emojies[i][j]
+#             if st.session_state.mood_buttons[mood]:
+#                 st.session_state.initial_mood.add(mood)
+#                 cols[j].button(mood, key=mood, icon=emoji, use_container_width=True, type="primary", on_click=toggle_mood, args=(mood, st.session_state.mood_buttons))
+#             else:
+#                 st.session_state.initial_mood.discard(mood)
+#                 cols[j].button(mood, key=mood, icon=emoji, use_container_width=True, type="tertiary", on_click=toggle_mood, args=(mood, st.session_state.mood_buttons))
 
 # st.write(st.session_state.initial_mood)
 
